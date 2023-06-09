@@ -40,16 +40,18 @@ implicit none
 
   pi=4d0*atan(1d0)
 
+  dx=0.15d0/20d0
+  dy=0.15d0/20d0
+  dz=0.15d0/20d0
+
   domx0=0d0
   domx1=5.0001d0
   domx_f=3.0001d0
   domy0=0d0
   domy1=0.1500001d0
   domz0=0d0
-  domz1=0.15000001d0
-  dx=0.15d0/20d0
-  dy=0.15d0/20d0
-  dz=0.15d0/20d0
+  domz1=(0.15000001d0-dz) ! to create fluid particle one layer below fsf separately
+
   drMin=min(dx,dy,dz)/3d0    
   nLeftLayer = 6
 
@@ -116,12 +118,12 @@ implicit none
      npt =0 
       print*,'nz val',nz
 
-     do k=1,nz
+     do k=1,(nz-1)
      do j =1,(ny-1)
      do i = nLeftLayer,nxx-1  !nx-1
        tmpr1=domx0+i*dx
         tmpr2=domy0+j*dy  
-
+        
         npt = npt+1
         s = (alpha*(hh(i))*(nz-k))/(nz-1)
         co = 1-exp(s)
@@ -133,11 +135,11 @@ implicit none
          cory(npt)=domy0+j*dy
          corz(npt)=domz1-cd
          nodid(npt)=0
-     end do
-     end do
-     end do
-      print*,'valu of k after loop',k,nz-1,j,ny-1,i,nxx-1
 
+     end do
+     end do
+     end do
+      
       print*,'total fluid part',npt
   open(15, file='XY_slp_fluid3d.DAT')
   do i=1,npt
@@ -166,14 +168,14 @@ implicit none
   !! FS nodes
   fsbeg=npt+1
   do j=1,ny-1
-    do i=-nLeftLayer,nx-1
+    do i=-nLeftLayer,nxx-1 !nx-1
       tmpr1=domx0+i*dx
       tmpr2=domy0+j*dy              
 
       npt=npt+1
       corx(npt)=domx0+i*dx
       cory(npt)=domy0+j*dy
-      corz(npt)=domz1
+      corz(npt)=domz1 + dz
       nodid(npt)=4
     enddo
   enddo  
